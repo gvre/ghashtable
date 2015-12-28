@@ -54,10 +54,11 @@ hashtable * hashtable_create(uint32_t size, size_t (*fn)(const char *key))
  * @param hashtable *ht Pointer to the hashtable
  * @param const char *key
  * @param void *value
+ * @param uint8_t free_on_erase Releases memory of value pointer on erase
  *
  * @return hashtable_item * Pointer to the newly created item on success, NULL on memory allocation failure or if key exists
  */
-hashtable_item * hashtable_insert(hashtable *ht, const char *key, void *value)
+hashtable_item * hashtable_insert(hashtable *ht, const char *key, void *value, uint8_t free_on_erase)
 {
     uint32_t idx = ht->fn(key) & (ht->size - 1); 
     hashtable_item *ret;
@@ -70,6 +71,7 @@ hashtable_item * hashtable_insert(hashtable *ht, const char *key, void *value)
         }
         ht->buckets[idx]->key = key;
         ht->buckets[idx]->value = value;
+        ht->buckets[idx]->free_on_erase = free_on_erase;
         ht->buckets[idx]->next = NULL;
 
         ret = ht->buckets[idx];
@@ -90,6 +92,7 @@ hashtable_item * hashtable_insert(hashtable *ht, const char *key, void *value)
         }
         it->key = key;
         it->value = value;
+        it->free_on_erase = free_on_erase;
         it->next = NULL;
         previous->next = it;
 
@@ -129,18 +132,23 @@ void * hashtable_get(hashtable *ht, const char *key)
  * @param hashtable *ht
  * @param const char *key
  * @param void *value
+ * @param uint8_t free_on_erase Releases memory of value pointer on erase
  *
  * @return hashtable_item * Pointer to value if key exists, otherwise NULL
  */
-hashtable_item * hashtable_set(hashtable *ht, const char *key, void *value)
+hashtable_item * hashtable_set(hashtable *ht, const char *key, void *value, uint8_t free_on_erase)
 {
     size_t keylen = strlen(key);
     uint32_t idx = ht->fn(key) & (ht->size - 1);
     hashtable_item *current = ht->buckets[idx];
     
     while (current) {
-        if (memcmp((void *)current->key, (void *)key, keylen) == 0)
+        if (memcmp((void *)current->key, (void *)key, keylen) == 0) {
+            if (current->free_on_erase)
+                free(current->value);
+            current->free_on_erase = free_on_erase;
             return current->value = value;
+        }
         current = current->next;
     }
 
@@ -166,6 +174,9 @@ size_t hashtable_erase(hashtable *ht, const char *key)
     hashtable_item *previous = current; 
     while (current) {
         if (memcmp((void *)current->key, (void *)key, keylen) == 0) {
+            if (current->free_on_erase)
+                free(current->value);
+
             if (current == ht->buckets[idx]) {
                 /* 1st item */
                 if (current->next == NULL) {
@@ -181,7 +192,8 @@ size_t hashtable_erase(hashtable *ht, const char *key)
                 previous->next = current->next;
                 free(current);
             }
-
+            
+            ht->nitems--;
             return 1;
         }
         previous = current;
@@ -205,6 +217,8 @@ void hashtable_clear(hashtable *ht)
         current = ht->buckets[i];
         while (current) {
             next = current->next;
+            if (current->free_on_erase)
+                free(current->value);
             free(current);
             current = next;
         }

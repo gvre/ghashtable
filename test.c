@@ -19,21 +19,45 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 #include "hash.h"
 #include "hashtable.h"
 
+int *numptr(void);
+int *numptr(void) { return malloc(sizeof(int)); }
+
+char *charprt(void);
+char *charprt(void) { return malloc(sizeof(char)); }
+
+struct foo {
+    char field[12];
+};
+
+struct foo* structptr(void);
+struct foo* structptr(void) { 
+    struct foo *f = malloc(sizeof *f);
+    strcpy(f->field, "hello world");
+
+    return f;
+}
+
 int main(void)
 {
     hashtable *ht = hashtable_create(32, hash);
     assert(ht != NULL);
 
-    hashtable_insert(ht, "key", "val");
+    hashtable_insert(ht, "key", "val", 0);
     assert(strcmp((char *)hashtable_get(ht, "key"), "val") == 0);
 
-    assert(hashtable_insert(ht, "key", "val") == NULL);
+    assert(hashtable_insert(ht, "key", "val", 0) == NULL);
 
-    assert(hashtable_set(ht, "key", "val2") != NULL);
+    assert(hashtable_set(ht, "key", "val2", 0) != NULL);
     assert(strcmp((char *)hashtable_get(ht, "key"), "val2") == 0);
 
     assert(hashtable_count_items(ht) == 1);
     assert(hashtable_erase(ht, "key") == 1);
+    assert(hashtable_count_items(ht) == 0);
+
+    hashtable_insert(ht, "numptr", numptr(), 1);
+    hashtable_insert(ht, "charprt", charprt(), 1);
+    hashtable_insert(ht, "structptr", structptr(), 1);
+    assert(hashtable_count_items(ht) == 3);
 
     hashtable_clear(ht);
 
