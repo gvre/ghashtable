@@ -37,12 +37,11 @@ hashtable * hashtable_create(uint32_t size, size_t (*fn)(const char *key))
 
     ht->size = size;
     ht->fn = fn;
-    ht->buckets = malloc(size * sizeof(hashtable_item **));
+    ht->buckets = calloc(size, sizeof *ht->buckets);
     if (ht->buckets == NULL) {
         perror("Could not allocate memory");
         return NULL;
     }
-    memset(ht->buckets, 0, size * sizeof(hashtable_item **));
     ht->nitems = 0;
 
     return ht;
