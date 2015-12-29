@@ -61,8 +61,8 @@ int main(void)
 
     size_t nkeys;
     const char **keys = hashtable_keys(ht, &nkeys);
-    assert(nkeys == 3);
     free(keys);
+    assert(nkeys == 3);
 
     hashtable_clear(ht);
 

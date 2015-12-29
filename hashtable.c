@@ -261,11 +261,20 @@ void hashtable_foreach(const hashtable *ht, size_t (*fn)(const char *key, void *
     }
 }
 
+/**
+ * Get hashtable's keys
+ * 
+ * @param const hashtable *ht
+ * @param size_t *nkeys
+ *
+ * @return const char **
+ */
 const char **hashtable_keys(const hashtable *ht, size_t *nkeys)
 {
     size_t j = 0;     
     const char **keys = malloc(hashtable_count_items(ht) * sizeof *keys);
     if (keys == NULL) {
+        *nkeys = 0;
         perror("Could not allocate memory");
         return NULL;
     }
