@@ -22,5 +22,6 @@ size_t hashtable_erase(hashtable *ht, const char *key);
 void hashtable_clear(hashtable *ht);
 size_t hashtable_count_items(const hashtable *ht);
 void hashtable_foreach(const hashtable *ht, size_t (*fn)(const char *key, void *value));
+char **hashtable_keys(const hashtable *ht, size_t *nkeys);
 #endif
 
