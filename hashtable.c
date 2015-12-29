@@ -261,10 +261,10 @@ void hashtable_foreach(const hashtable *ht, size_t (*fn)(const char *key, void *
     }
 }
 
-char **hashtable_keys(const hashtable *ht, size_t *nkeys)
+const char **hashtable_keys(const hashtable *ht, size_t *nkeys)
 {
     size_t j = 0;     
-    char **keys = malloc(hashtable_count_items(ht));
+    const char **keys = malloc(hashtable_count_items(ht) * sizeof *keys);
     if (keys == NULL) {
         perror("Could not allocate memory");
         return NULL;
@@ -274,7 +274,7 @@ char **hashtable_keys(const hashtable *ht, size_t *nkeys)
     for (uint32_t i = 0; i < ht->size; i++) {
         current = ht->buckets[i];
         while (current) {
-            keys[j++] = (char *)current->key;
+            keys[j++] = current->key;
             current = current->next;
         }
     }
