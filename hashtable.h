@@ -3,8 +3,8 @@
 typedef struct h_item {
     const char *key;
     void *value;
-    uint8_t free_on_erase;
     struct h_item *next;
+    void (*dealloc_fn)(void *it);
 } hashtable_item;
 
 typedef struct h_table {
@@ -15,9 +15,9 @@ typedef struct h_table {
 } hashtable;
 
 hashtable * hashtable_create(uint32_t size, size_t (*fn)(const char *key));
-hashtable_item * hashtable_insert(hashtable *ht, const char *key, void *value, uint8_t free_on_erase);
+hashtable_item * hashtable_insert(hashtable *ht, const char *key, void *value, void (*dealloc_fn)(void *it));
 void * hashtable_get(hashtable *ht, const char *key);
-hashtable_item * hashtable_set(hashtable *ht, const char *key, void *value, uint8_t free_on_erase);
+hashtable_item * hashtable_set(hashtable *ht, const char *key, void *value, void (*dealloc_fn)(void *it));
 size_t hashtable_erase(hashtable *ht, const char *key);
 void hashtable_clear(hashtable *ht);
 size_t hashtable_count_items(const hashtable *ht);
