@@ -165,32 +165,25 @@ hashtable_item * hashtable_set(hashtable *ht, const char *key, void *value, void
 size_t hashtable_erase(hashtable *ht, const char *key)
 {
     uint32_t idx = ht->fn(key) & (ht->size - 1); 
-    hashtable_item *current = ht->buckets[idx];
-    if (current == NULL)
+    if (ht->buckets[idx] == NULL)
         return 0;
 
     size_t keylen = strlen(key);
+    hashtable_item *current = ht->buckets[idx];
     hashtable_item *previous = current; 
     while (current) {
         if (memcmp((void *)current->key, (void *)key, keylen) == 0) {
             if (current->dealloc_fn)
                 current->dealloc_fn(current->value);
 
-            if (current == ht->buckets[idx]) {
+            if (current == ht->buckets[idx]) { 
                 /* 1st item */
-                if (current->next == NULL) {
-                    /* list has 1 item */
-                    free(current);
-                    ht->buckets[idx] = NULL;
-                } else {
-                    /* list has many items */
-                    ht->buckets[idx] = current->next;
-                    free(current);
-                }
+                ht->buckets[idx] = current->next;
             } else {
                 previous->next = current->next;
-                free(current);
             }
+
+            free(current);
             
             ht->nitems--;
             return 1;
