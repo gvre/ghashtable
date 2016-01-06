@@ -20,10 +20,10 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 /**
  * Create and initialize a hashtable
  *
- * @param uint32_t size Total buckets (must be power of 2)
- * @param size_t (*fn)(const char *key) Pointer to the hash function
+ * @param size Total buckets (must be power of 2)
+ * @param fn Pointer to the hash function
  *
- * @return hashtable * Pointer to a newly created hashtable on success, NULL on memory allocation failure
+ * @return Pointer to a newly created hashtable on success, NULL on memory allocation failure
  */
 hashtable * hashtable_create(uint32_t size, size_t (*fn)(const char *key))
 {
@@ -50,12 +50,12 @@ hashtable * hashtable_create(uint32_t size, size_t (*fn)(const char *key))
 /**
  * Insert a key, value pair in the hashtable
  *
- * @param hashtable *ht Pointer to the hashtable
- * @param const char *key
- * @param void *value
- * @param void (*dealloc_fn)(void *it) Pointer to the deallocator function
+ * @param ht Pointer to the hashtable
+ * @param key Item's key
+ * @param value Item's value
+ * @param dealloc_fn Pointer to the deallocator function
  *
- * @return hashtable_item * Pointer to the newly created item on success, NULL on memory allocation failure or if key exists
+ * @return Pointer to the newly created item on success, NULL on memory allocation failure or if key exists
  */
 hashtable_item * hashtable_insert(hashtable *ht, const char *key, void *value, void (*dealloc_fn)(void *it))
 {
@@ -76,7 +76,7 @@ hashtable_item * hashtable_insert(hashtable *ht, const char *key, void *value, v
         ret = ht->buckets[idx];
     } else {
         size_t keylen = strlen(key);
-        hashtable_item *previous, *current = ht->buckets[idx];
+        hashtable_item *previous = NULL, *current = ht->buckets[idx];
         while (current) {
             if (memcmp((void *)current->key, (void *)key, keylen) == 0)
                 return NULL;
@@ -105,10 +105,10 @@ hashtable_item * hashtable_insert(hashtable *ht, const char *key, void *value, v
 /**
  * Get value from the hashtable
  *
- * @param hashtable *ht
- * @param const char *key
+ * @param ht Hashtable
+ * @param key Item's key
  *
- * @return void * Pointer to value if key exists, otherwise NULL
+ * @return Pointer to value if key exists, otherwise NULL
  */
 void * hashtable_get(hashtable *ht, const char *key)
 {
@@ -128,12 +128,12 @@ void * hashtable_get(hashtable *ht, const char *key)
 /**
  * Set value for the specified key
  *
- * @param hashtable *ht
- * @param const char *key
- * @param void *value
- * @param void (*dealloc_fn)(void *it) Pointer to the deallocator function
+ * @param ht Hashtable
+ * @param key Item's key
+ * @param value Item's value
+ * @param dealloc_fn Pointer to the deallocator function
  *
- * @return hashtable_item * Pointer to value if key exists, otherwise NULL
+ * @return Pointer to value if key exists, otherwise NULL
  */
 hashtable_item * hashtable_set(hashtable *ht, const char *key, void *value, void (*dealloc_fn)(void *it))
 {
@@ -157,10 +157,10 @@ hashtable_item * hashtable_set(hashtable *ht, const char *key, void *value, void
 /**
  * Erase an item with the specified key
  *
- * @param hashtable *ht
- * @param const char *key
+ * @param ht Hashtable
+ * @param key Item's key
  *
- * @return size_t 1 if key exists, otherwise 0
+ * @return Return 1 if key exists, otherwise 0
  */
 size_t hashtable_erase(hashtable *ht, const char *key)
 {
@@ -176,12 +176,10 @@ size_t hashtable_erase(hashtable *ht, const char *key)
             if (current->dealloc_fn)
                 current->dealloc_fn(current->value);
 
-            if (current == ht->buckets[idx]) { 
-                /* 1st item */
-                ht->buckets[idx] = current->next;
-            } else {
+            if (current == ht->buckets[idx])
+                ht->buckets[idx] = current->next; /* 1st item */
+            else
                 previous->next = current->next;
-            }
 
             free(current);
             
@@ -198,9 +196,8 @@ size_t hashtable_erase(hashtable *ht, const char *key)
 /**
  * Deallocate the hashtable
  *
- * @param hashtable *ht
+ * @param ht Hashtable
  *
- * @return void
  */
 void hashtable_clear(hashtable *ht)
 {
@@ -223,9 +220,9 @@ void hashtable_clear(hashtable *ht)
 /**
  * Count hashtable's items
  *
- * @param const hashtable *ht
+ * @param ht Hashtable
  *
- * @return size_t
+ * @return Number of hashtable's items
  */
 size_t hashtable_count_items(const hashtable *ht)
 {
@@ -235,10 +232,9 @@ size_t hashtable_count_items(const hashtable *ht)
 /**
  * Apply fn callback to each item. Stops if callback returns 0
  *
- * @param const hashtable *ht
- * @param size_t (*fn)(const char *key, void *value) Pointer to the callback function
+ * @param ht Hashtable
+ * @param fn Pointer to the callback function
  *
- * @return void
  */
 void hashtable_foreach(const hashtable *ht, size_t (*fn)(const char *key, void *value))
 {
@@ -256,10 +252,10 @@ void hashtable_foreach(const hashtable *ht, size_t (*fn)(const char *key, void *
 /**
  * Get hashtable's keys
  * 
- * @param const hashtable *ht
- * @param size_t *nkeys
+ * @param ht Hashtable
+ * @param nkeys Will store the number of keys the hashtable contains
  *
- * @return const char **
+ * @return Hashtable's keys
  */
 const char **hashtable_keys(const hashtable *ht, size_t *nkeys)
 {
