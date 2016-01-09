@@ -78,7 +78,7 @@ hashtable_item * hashtable_insert(hashtable *ht, const char *key, void *value, v
         size_t keylen = strlen(key);
         hashtable_item *previous = NULL, *current = ht->buckets[idx];
         while (current) {
-            if (memcmp((void *)current->key, (void *)key, keylen) == 0)
+            if (memcmp(current->key, key, keylen) == 0)
                 return NULL;
             previous = current;
             current = current->next;
@@ -117,7 +117,7 @@ void * hashtable_get(hashtable *ht, const char *key)
     hashtable_item *current = ht->buckets[idx];
     
     while (current) {
-        if (memcmp((void *)current->key, (void *)key, keylen) == 0)
+        if (memcmp(current->key, key, keylen) == 0)
             return current->value;
         current = current->next;
     }
@@ -142,7 +142,7 @@ hashtable_item * hashtable_set(hashtable *ht, const char *key, void *value, void
     hashtable_item *current = ht->buckets[idx];
     
     while (current) {
-        if (memcmp((void *)current->key, (void *)key, keylen) == 0) {
+        if (memcmp(current->key, key, keylen) == 0) {
             if (current->dealloc_fn)
                 current->dealloc_fn(current->value);
             current->dealloc_fn = dealloc_fn;
@@ -172,7 +172,7 @@ size_t hashtable_erase(hashtable *ht, const char *key)
     hashtable_item *current = ht->buckets[idx];
     hashtable_item *previous = current; 
     while (current) {
-        if (memcmp((void *)current->key, (void *)key, keylen) == 0) {
+        if (memcmp(current->key, key, keylen) == 0) {
             if (current->dealloc_fn)
                 current->dealloc_fn(current->value);
 
