@@ -78,6 +78,12 @@ int main(void)
     free(keys);
     assert(nkeys == 3);
 
+    hashtable_insert(ht, "longer", "val", NULL);
+    char *t = (char *)hashtable_get(ht, "long");
+    assert(t == NULL);
+
+    assert(hashtable_count_items(ht) == 4);
+
     hashtable_clear(ht);
 
     return EXIT_SUCCESS;
